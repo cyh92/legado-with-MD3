@@ -237,10 +237,7 @@ jobs:
   create_release:
     needs: [ prepare, build ]
     # 仅在所有者的 push 到 main 分支时执行发布
-    if: |
-      github.event_name == 'push' &&
-      github.ref == 'refs/heads/main' &&
-      github.actor == 'HapeLee' &&
+    if: |      
       (needs.prepare.outputs.build_number > 0 || needs.prepare.outputs.is_release == 'true') &&
       success()
     runs-on: ubuntu-latest
