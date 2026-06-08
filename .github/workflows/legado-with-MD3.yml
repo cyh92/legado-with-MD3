@@ -208,10 +208,8 @@ jobs:
       - name: 下载所有 APK Artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: '*-apk-*'
+          name: apks
           path: artifacts
-          merge-multiple: true
-          if-no-artifact-found: error
 
       # 2. 重命名逻辑
       - name: 整理并重命名 APK 文件
