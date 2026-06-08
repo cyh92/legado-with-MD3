@@ -204,42 +204,29 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
-      # 1. 下载 build 任务上传的所有 APK
-      - name: 下载所有 APK Artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: apks
-          path: artifacts
+      # 构建完成后，直接收集所有 APK 到 artifacts 目录（不上传）
+      - name: 收集所有 APK 到本地目录
+        run: |
+          mkdir -p artifacts
+          find app/build/outputs/apk -name "*.apk" -exec mv {} artifacts/ \;
+          ls -l artifacts
 
-      # 2. 重命名逻辑
       - name: 整理并重命名 APK 文件
         id: organize_apks
         run: |
           VERSIONL="${{ needs.prepare.outputs.versionL }}"
           echo "正在整理 APK 文件..."
-          if [ ! -d artifacts ]; then
-            echo "::error::artifacts 目录不存在，说明上一步没有下载到 APK。"
-            exit 1
-          fi
+          
           cd artifacts
-
           shopt -s nullglob
+          
           for f in *.apk; do
             out="legado-${VERSIONL}"
-            if [[ "$f" == *noR8* || "$f" == *nor8* ]]; then
-              out="${out}-noR8"
-            fi
-
-            if [[ "$f" == *arm64-v8a* ]]; then
-              out="${out}-arm64-v8a"
-            elif [[ "$f" == *armeabi-v7a* ]]; then
-              out="${out}-armeabi-v7a"
-            fi
-
-            out="${out}.apk"
-            mv "$f" "$out"
+            [[ $f == *arm64-v8a* ]] && out+="-arm64-v8a"
+            [[ $f == *armeabi-v7a* ]] && out+="-armeabi-v7a"
+            [[ $f == *universal* ]] && out+="-universal"
+            mv "$f" "${out}.apk"
           done
-
           ls -l
 
       #
@@ -294,7 +281,6 @@ jobs:
           name: ${{ needs.prepare.outputs.is_release == 'true' && format('Release {0}', needs.prepare.outputs.versionL) || format('Pre-release {0}', needs.prepare.outputs.versionL) }}
           body: ${{ steps.get_commits.outputs.release_body }}
           prerelease: ${{ needs.prepare.outputs.is_release != 'true' }}
-          files: |
-            artifacts/legado-${{ needs.prepare.outputs.versionL }}*.apk
+          files: artifacts/*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
