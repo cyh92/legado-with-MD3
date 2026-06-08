@@ -109,7 +109,7 @@ jobs:
       matrix:
         product: [ app ]
         # 如果是正式版，只构建 release；如果是测试版，构建 release 和 noR8
-        type:["release"]
+        type: ["release"]
       fail-fast: false
     runs-on: ubuntu-latest
     env:
