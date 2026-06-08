@@ -207,14 +207,14 @@ jobs:
       - name: 收集所有 APK 文件
         run: |
           # 创建根目录 artifacts
-          mkdir -p "${{ github.workspace }}/artifacts"
+          mkdir -p artifacts
           
           # 递归查找 app/build 下所有 apk，复制到 artifacts
-          find "${{ github.workspace }}/app/build" -name "*.apk" -type f -exec cp {} "${{ github.workspace }}/artifacts/" \;
+          find "app/build" -name "*.apk" -type f -exec cp {} "${{ github.workspace }}/artifacts/" \;
           
           # 查看收集结果
           echo "已收集的 APK 文件："
-          ls -lh "${{ github.workspace }}/artifacts"
+          ls -lh artifacts
 
       - name: 整理并重命名 APK 文件
         id: organize_apks
@@ -223,7 +223,7 @@ jobs:
           echo "正在整理 APK 文件..."
           
            # 进入根目录的 artifacts
-          cd "${{ github.workspace }}/artifacts"
+          cd artifacts
           shopt -s nullglob
           
           for f in *.apk; do
@@ -287,6 +287,6 @@ jobs:
           name: ${{ needs.prepare.outputs.is_release == 'true' && format('Release {0}', needs.prepare.outputs.versionL) || format('Pre-release {0}', needs.prepare.outputs.versionL) }}
           body: ${{ steps.get_commits.outputs.release_body }}
           prerelease: ${{ needs.prepare.outputs.is_release != 'true' }}
-          files: ${{ github.workspace }}/artifacts/*.apk
+          files: artifacts/*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
