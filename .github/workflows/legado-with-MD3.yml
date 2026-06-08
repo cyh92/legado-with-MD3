@@ -208,7 +208,7 @@ jobs:
         run: |
           # 创建根目录 artifacts
           mkdir -p artifacts
-          
+          ls
           # 递归查找 app/build 下所有 apk，复制到 artifacts
           find "app/build" -name "*.apk" -type f -exec cp {} "${{ github.workspace }}/artifacts/" \;
           
