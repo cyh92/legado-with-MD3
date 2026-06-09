@@ -210,7 +210,8 @@ jobs:
           mkdir -p artifacts
           ls
           # 递归查找 app/build 下所有 apk，复制到 artifacts
-          find "app" -name "*.apk" -type f -exec cp {} "artifacts/" \;
+          #find "app" -name "*.apk" -type f -exec cp {} "artifacts/" \;
+          find ./app -name "*.apk" -type f -exec cp {} artifacts/ \;
           
           # 查看收集结果
           echo "已收集的 APK 文件："
