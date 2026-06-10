@@ -1,7 +1,6 @@
 package io.legado.app.ui.book.read
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.os.Build
 import android.view.Gravity
@@ -43,7 +42,6 @@ import io.legado.app.ui.book.read.page.ReadView
 import io.legado.app.ui.book.read.page.entities.PageDirection
 import io.legado.app.ui.book.read.page.provider.ChapterProvider
 import io.legado.app.ui.book.read.page.provider.TextPageFactory
-import io.legado.app.ui.book.searchContent.SearchResult
 import io.legado.app.ui.login.SourceLoginJsExtensions
 import io.legado.app.ui.widget.PopupAction
 import io.legado.app.utils.ColorUtils
@@ -176,6 +174,7 @@ class ReadBookController(
      * View/Window-only resume — business logic handled by ViewModel via OnResume intent.
      */
     fun onResume() {
+        setOrientation()
         upSystemUiVisibility()
         refs?.readView?.upTime()
         screenOffTimerStart()
@@ -528,7 +527,9 @@ class ReadBookController(
             }
 
             R.id.menu_bookmark -> {
-                viewModel.onIntent(ReadBookIntent.TextActionBookmark(selectedText))
+                refs?.readView?.curPage?.createBookmark()?.let {
+                    viewModel.onIntent(ReadBookIntent.TextActionBookmark(it))
+                } ?: activity.toastOnUi(R.string.create_bookmark_error)
                 return true
             }
 
@@ -742,6 +743,10 @@ class ReadBookController(
                 networkChangedListener.unRegister()
             }
 
+            is ReadBookEffect.SetOrientation -> {
+                setOrientation()
+            }
+
             is ReadBookEffect.BackupNow -> {
                 Backup.autoBack(activity)
             }
@@ -766,6 +771,7 @@ class ReadBookController(
             is ReadBookEffect.OpenMenuCustomIconPicker,
             is ReadBookEffect.OpenTitleBarCustomIconPicker,
             is ReadBookEffect.OpenSystemTtsSettings,
+            is ReadBookEffect.OpenHttpTtsLogin,
             is ReadBookEffect.TtsCacheCleared,
             is ReadBookEffect.ExportJson,
             // DB query + bookmark effects — handled by ViewModel, ignored here
